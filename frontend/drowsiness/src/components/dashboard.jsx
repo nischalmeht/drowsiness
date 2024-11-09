@@ -1,5 +1,5 @@
 // components/Dashboard.js
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 // import DataTable from './DataTable';
 import './Dashboard.css'
@@ -7,42 +7,54 @@ import './Dashboard.css'
 
 export const Dashboard = () => {
     const [isOpen, setIsOpen] = useState(false);
+    const [data, setData] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    let user = localStorage.getItem("localData");
+    let userData = JSON.parse(user)
     const createDriver = async (e) => {
-   
         e.preventDefault(); // Prevents the default form submission behavior
         const formData = new FormData(e.target);
-        let user= localStorage.getItem("localData");
-        let userData = JSON.parse(user)
-        console.log(userData,'localData')
+        let user = localStorage.getItem("localData");
+        let userData = JSON.parse(user);
         let data = {
-            driver_name:formData.get('driver_name'),
-            vehicle_no:formData.get('vehicle_no'),
-            user_id:userData[0]._id,          
+            driver_name: formData.get('driver_name'),
+            vehicle_no: formData.get('vehicle_no'),
+            user_id: userData[0]._id,
             email: formData.get('email-driver'), // Accessing the email from the form
             password: formData.get('password-driver'), // Accessing the password from the form
-          };
-      
-          try {
+        };
+
+        try {
             const response = await axios.post('http://localhost:8001/url/add-driver', data);
-            
-            console.log('Sign In Response:', data);
-            // setSignUpData({ full_name: '', phone_no: '', email: '', password: '' });
-           
-        
-            // setIsActive(!isActive);
-            
-          } catch (error) {
+            fetchData();     
+        } catch (error) {
             console.error('Error signing in:', error);
             alert('Sign In failed: ' + error.response.data.message);
-          }
-        //   console.log('Sign In Data:', data); // Log the form values
-        
-        
-        
-      };
+        }
+    };
+    useEffect(() => {        
+        fetchData();
+    }, []); 
+    const fetchData = async () => {
+        try {
+            let user = localStorage.getItem("localData");
+            let userData = JSON.parse(user);
+            let data = {
+                user_id: userData[0]._id,
+            };
+
+            const response = await axios.post("http://localhost:8001/url/get-driver", data);           
+            setData(response && response.data && response.data.EncryptedResponse && response.data.EncryptedResponse.data ? response.data.EncryptedResponse.data : ''); // Set the fetched data to state
+        } catch (error) {
+            setError(error.message); // Set error if request fails
+        } finally {
+            setLoading(false); // Stop loading spinner
+        }
+    };
     const openModal = () => setIsOpen(true);
     const closeModal = () => setIsOpen(false);
-    
+
     return (
         <>
             <div className="d-flex flex-column flex-lg-row h-lg-full bg-surface-secondary">
@@ -235,330 +247,39 @@ export const Dashboard = () => {
                                         <thead className="thead-light">
                                             <tr>
                                                 <th scope="col">Name</th>
-                                                <th scope="col">Date</th>
+                                                <th scope="col">Email</th>
                                                 <th scope="col">Company</th>
-                                                <th scope="col">Offer</th>
+                                                <th scope="col-2">Offer</th>
                                                 <th scope="col">Meeting</th>
                                                 <th></th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr>
-                                                <td>
-                                                    <img alt="..." src="https://images.unsplash.com/photo-1502823403499-6ccfcf4fb453?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=3&w=256&h=256&q=80" className="avatar avatar-sm rounded-circle me-2" />
-                                                    <a className="text-heading font-semibold" href="#">
-                                                        Robert Fox
-                                                    </a>
-                                                </td>
-                                                <td>
-                                                    Feb 15, 2021
-                                                </td>
-                                                <td>
-                                                    <img alt="..." src="https://preview.webpixels.io/web/img/other/logos/logo-1.png" className="avatar avatar-xs rounded-circle me-2" />
-                                                    <a className="text-heading font-semibold" href="#">
-                                                        Dribbble
-                                                    </a>
-                                                </td>
-                                                <td>
-                                                    $3.500
-                                                </td>
-                                                <td>
+                                            
+
+                                                {data && data.map((item) => <tr key={item && item.email ? item.email : ""}>
+                                                    <td>{item && item.name ? item.name : ""}</td>
+                                                    <td>{item && item.email ? item.email : ""}</td>
+                                                    <td>{item && item.vehicle_no ? item.vehicle_no : ""}</td>
+                                                    <td>
                                                     <span className="badge badge-lg badge-dot">
                                                         <i className="bg-success"></i>Scheduled
                                                     </span>
                                                 </td>
-                                                <td className="text-end">
+                                                    <td className="text-end">
                                                     <a href="#" className="btn btn-sm btn-neutral">View</a>
                                                     <button type="button" className="btn btn-sm btn-square btn-neutral text-danger-hover">
                                                         <i className="bi bi-trash"></i>
                                                     </button>
                                                 </td>
-                                            </tr>
-                                            <tr>
-                                                <td>
-                                                    <img alt="..." src="https://images.unsplash.com/photo-1610271340738-726e199f0258?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=3&w=256&h=256&q=80" className="avatar avatar-sm rounded-circle me-2" />
-                                                    <a className="text-heading font-semibold" href="#">
-                                                        Darlene Robertson
-                                                    </a>
-                                                </td>
-                                                <td>
-                                                    Apr 15, 2021
-                                                </td>
-                                                <td>
-                                                    <img alt="..." src="https://preview.webpixels.io/web/img/other/logos/logo-2.png" className="avatar avatar-xs rounded-circle me-2" />
-                                                    <a className="text-heading font-semibold" href="#">
-                                                        Netguru
-                                                    </a>
-                                                </td>
-                                                <td>
-                                                    $2.750
-                                                </td>
-                                                <td>
-                                                    <span className="badge badge-lg badge-dot">
-                                                        <i className="bg-warning"></i>Postponed
-                                                    </span>
-                                                </td>
-                                                <td className="text-end">
-                                                    <a href="#" className="btn btn-sm btn-neutral">View</a>
-                                                    <button type="button" className="btn btn-sm btn-square btn-neutral text-danger-hover">
-                                                        <i className="bi bi-trash"></i>
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>
-                                                    <img alt="..." src="https://images.unsplash.com/photo-1610878722345-79c5eaf6a48c?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=3&w=256&h=256&q=80" className="avatar avatar-sm rounded-circle me-2" />
-                                                    <a className="text-heading font-semibold" href="#">
-                                                        Theresa Webb
-                                                    </a>
-                                                </td>
-                                                <td>
-                                                    Mar 20, 2021
-                                                </td>
-                                                <td>
-                                                    <img alt="..." src="https://preview.webpixels.io/web/img/other/logos/logo-3.png" className="avatar avatar-xs rounded-circle me-2" />
-                                                    <a className="text-heading font-semibold" href="#">
-                                                        Figma
-                                                    </a>
-                                                </td>
-                                                <td>
-                                                    $4.200
-                                                </td>
-                                                <td>
-                                                    <span className="badge badge-lg badge-dot">
-                                                        <i className="bg-success"></i>Scheduled
-                                                    </span>
-                                                </td>
-                                                <td className="text-end">
-                                                    <a href="#" className="btn btn-sm btn-neutral">View</a>
-                                                    <button type="button" className="btn btn-sm btn-square btn-neutral text-danger-hover">
-                                                        <i className="bi bi-trash"></i>
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>
-                                                    <img alt="..." src="https://images.unsplash.com/photo-1612422656768-d5e4ec31fac0?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=3&w=256&h=256&q=80" className="avatar avatar-sm rounded-circle me-2" />
-                                                    <a className="text-heading font-semibold" href="#">
-                                                        Kristin Watson
-                                                    </a>
-                                                </td>
-                                                <td>
-                                                    Feb 15, 2021
-                                                </td>
-                                                <td>
-                                                    <img alt="..." src="https://preview.webpixels.io/web/img/other/logos/logo-4.png" className="avatar avatar-xs rounded-circle me-2" />
-                                                    <a className="text-heading font-semibold" href="#">
-                                                        Mailchimp
-                                                    </a>
-                                                </td>
-                                                <td>
-                                                    $3.500
-                                                </td>
-                                                <td>
-                                                    <span className="badge badge-lg badge-dot">
-                                                        <i className="bg-dark"></i>Not discussed
-                                                    </span>
-                                                </td>
-                                                <td className="text-end">
-                                                    <a href="#" className="btn btn-sm btn-neutral">View</a>
-                                                    <button type="button" className="btn btn-sm btn-square btn-neutral text-danger-hover">
-                                                        <i className="bi bi-trash"></i>
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>
-                                                    <img alt="..." src="https://images.unsplash.com/photo-1608976328267-e673d3ec06ce?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=3&w=256&h=256&q=80" className="avatar avatar-sm rounded-circle me-2" />
-                                                    <a className="text-heading font-semibold" href="#">
-                                                        Cody Fisher
-                                                    </a>
-                                                </td>
-                                                <td>
-                                                    Apr 10, 2021
-                                                </td>
-                                                <td>
-                                                    <img alt="..." src="https://preview.webpixels.io/web/img/other/logos/logo-5.png" className="avatar avatar-xs rounded-circle me-2" />
-                                                    <a className="text-heading font-semibold" href="#">
-                                                        Webpixels
-                                                    </a>
-                                                </td>
-                                                <td>
-                                                    $1.500
-                                                </td>
-                                                <td>
-                                                    <span className="badge badge-lg badge-dot">
-                                                        <i className="bg-danger"></i>Canceled
-                                                    </span>
-                                                </td>
-                                                <td className="text-end">
-                                                    <a href="#" className="btn btn-sm btn-neutral">View</a>
-                                                    <button type="button" className="btn btn-sm btn-square btn-neutral text-danger-hover">
-                                                        <i className="bi bi-trash"></i>
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>
-                                                    <img alt="..." src="https://images.unsplash.com/photo-1502823403499-6ccfcf4fb453?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=3&w=256&h=256&q=80" className="avatar avatar-sm rounded-circle me-2" />
-                                                    <a className="text-heading font-semibold" href="#">
-                                                        Robert Fox
-                                                    </a>
-                                                </td>
-                                                <td>
-                                                    Feb 15, 2021
-                                                </td>
-                                                <td>
-                                                    <img alt="..." src="https://preview.webpixels.io/web/img/other/logos/logo-1.png" className="avatar avatar-xs rounded-circle me-2" />
-                                                    <a className="text-heading font-semibold" href="#">
-                                                        Dribbble
-                                                    </a>
-                                                </td>
-                                                <td>
-                                                    $3.500
-                                                </td>
-                                                <td>
-                                                    <span className="badge badge-lg badge-dot">
-                                                        <i className="bg-success"></i>Scheduled
-                                                    </span>
-                                                </td>
-                                                <td className="text-end">
-                                                    <a href="#" className="btn btn-sm btn-neutral">View</a>
-                                                    <button type="button" className="btn btn-sm btn-square btn-neutral text-danger-hover">
-                                                        <i className="bi bi-trash"></i>
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>
-                                                    <img alt="..." src="https://images.unsplash.com/photo-1610271340738-726e199f0258?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=3&w=256&h=256&q=80" className="avatar avatar-sm rounded-circle me-2" />
-                                                    <a className="text-heading font-semibold" href="#">
-                                                        Darlene Robertson
-                                                    </a>
-                                                </td>
-                                                <td>
-                                                    Apr 15, 2021
-                                                </td>
-                                                <td>
-                                                    <img alt="..." src="https://preview.webpixels.io/web/img/other/logos/logo-2.png" className="avatar avatar-xs rounded-circle me-2" />
-                                                    <a className="text-heading font-semibold" href="#">
-                                                        Netguru
-                                                    </a>
-                                                </td>
-                                                <td>
-                                                    $2.750
-                                                </td>
-                                                <td>
-                                                    <span className="badge badge-lg badge-dot">
-                                                        <i className="bg-warning"></i>Postponed
-                                                    </span>
-                                                </td>
-                                                <td className="text-end">
-                                                    <a href="#" className="btn btn-sm btn-neutral">View</a>
-                                                    <button type="button" className="btn btn-sm btn-square btn-neutral text-danger-hover">
-                                                        <i className="bi bi-trash"></i>
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>
-                                                    <img alt="..." src="https://images.unsplash.com/photo-1610878722345-79c5eaf6a48c?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=3&w=256&h=256&q=80" className="avatar avatar-sm rounded-circle me-2" />
-                                                    <a className="text-heading font-semibold" href="#">
-                                                        Theresa Webb
-                                                    </a>
-                                                </td>
-                                                <td>
-                                                    Mar 20, 2021
-                                                </td>
-                                                <td>
-                                                    <img alt="..." src="https://preview.webpixels.io/web/img/other/logos/logo-3.png" className="avatar avatar-xs rounded-circle me-2" />
-                                                    <a className="text-heading font-semibold" href="#">
-                                                        Figma
-                                                    </a>
-                                                </td>
-                                                <td>
-                                                    $4.200
-                                                </td>
-                                                <td>
-                                                    <span className="badge badge-lg badge-dot">
-                                                        <i className="bg-success"></i>Scheduled
-                                                    </span>
-                                                </td>
-                                                <td className="text-end">
-                                                    <a href="#" className="btn btn-sm btn-neutral">View</a>
-                                                    <button type="button" className="btn btn-sm btn-square btn-neutral text-danger-hover">
-                                                        <i className="bi bi-trash"></i>
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>
-                                                    <img alt="..." src="https://images.unsplash.com/photo-1612422656768-d5e4ec31fac0?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=3&w=256&h=256&q=80" className="avatar avatar-sm rounded-circle me-2" />
-                                                    <a className="text-heading font-semibold" href="#">
-                                                        Kristin Watson
-                                                    </a>
-                                                </td>
-                                                <td>
-                                                    Feb 15, 2021
-                                                </td>
-                                                <td>
-                                                    <img alt="..." src="https://preview.webpixels.io/web/img/other/logos/logo-4.png" className="avatar avatar-xs rounded-circle me-2" />
-                                                    <a className="text-heading font-semibold" href="#">
-                                                        Mailchimp
-                                                    </a>
-                                                </td>
-                                                <td>
-                                                    $3.500
-                                                </td>
-                                                <td>
-                                                    <span className="badge badge-lg badge-dot">
-                                                        <i className="bg-dark"></i>Not discussed
-                                                    </span>
-                                                </td>
-                                                <td className="text-end">
-                                                    <a href="#" className="btn btn-sm btn-neutral">View</a>
-                                                    <button type="button" className="btn btn-sm btn-square btn-neutral text-danger-hover">
-                                                        <i className="bi bi-trash"></i>
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>
-                                                    <img alt="..." src="https://images.unsplash.com/photo-1608976328267-e673d3ec06ce?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=3&w=256&h=256&q=80" className="avatar avatar-sm rounded-circle me-2" />
-                                                    <a className="text-heading font-semibold" href="#">
-                                                        Cody Fisher
-                                                    </a>
-                                                </td>
-                                                <td>
-                                                    Apr 10, 2021
-                                                </td>
-                                                <td>
-                                                    <img alt="..." src="https://preview.webpixels.io/web/img/other/logos/logo-5.png" className="avatar avatar-xs rounded-circle me-2" />
-                                                    <a className="text-heading font-semibold" href="#">
-                                                        Webpixels
-                                                    </a>
-                                                </td>
-                                                <td>
-                                                    $1.500
-                                                </td>
-                                                <td>
-                                                    <span className="badge badge-lg badge-dot">
-                                                        <i className="bg-danger"></i>Canceled
-                                                    </span>
-                                                </td>
-                                                <td className="text-end">
-                                                    <a href="#" className="btn btn-sm btn-neutral">View</a>
-                                                    <button type="button" className="btn btn-sm btn-square btn-neutral text-danger-hover">
-                                                        <i className="bi bi-trash"></i>
-                                                    </button>
-                                                </td>
-                                            </tr>
+                                                </tr>
+                                                )}
+
                                         </tbody>
+                                        
                                     </table>
                                 </div>
-                                <div className="card-footer border-0 py-5">
-                                    <span className="text-muted text-sm">Showing 10 items out of 250 results found</span>
-                                </div>
+                               
                             </div>
                         </div>
                     </main>
@@ -567,30 +288,30 @@ export const Dashboard = () => {
             {isOpen && (
                 <div className="modal-overlay" onClick={closeModal}>
                     <div className="modal-content slide-down" onClick={(e) => e.stopPropagation()}>
-                        
+
                         <form onSubmit={createDriver}>
-                        <div className="mb-3">
+                            <div className="mb-3">
                                 <label for="exampleInputEmail1" className="form-label">Driver Name</label>
                                 <input type="text" className="form-control" id="driver_name" name="driver_name" />
                             </div>
 
                             <div className="mb-3">
                                 <label for="exampleInputEmail1" className="form-label">Email </label>
-                                <input type="email" className="form-control" id="email-driver" name="email-driver" 
-                                autoComplete="email"
+                                <input type="email" className="form-control" id="email-driver" name="email-driver"
+                                    autoComplete="email"
                                 />
                             </div>
                             <div className="mb-3">
                                 <label for="exampleInputEmail1" className="form-label">Vehicle No.</label>
                                 <input type="text" className="form-control" id="vehicle_no" name="vehicle_no" />
                             </div>
-                            
+
                             <div className="mb-3">
                                 <label for="exampleInputPassword1" className="form-label">Password</label>
-                                <input type="password" className="form-control" name="password-driver" id="password-driver" autoComplete="current-password"/>
+                                <input type="password" className="form-control" name="password-driver" id="password-driver" autoComplete="current-password" />
                             </div>
 
-                            <button type="submit" className="btn btn-primary" >Add</button>
+                            <button type="submit" className="btn btn-primary"  >Add</button>
                         </form>
                     </div>
                 </div>

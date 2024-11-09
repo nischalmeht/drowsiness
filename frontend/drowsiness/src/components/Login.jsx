@@ -4,10 +4,16 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 export const Login = () => {
   const [isActive, setIsActive] = useState(false);
-
+  const [isDriver, setDriver] = useState(false);
   const toggleForm = (e) => {
     setIsActive(!isActive);
+    setDriver(false);
     
+  };
+  const LoginAsDriver = (e) => {
+    setDriver(!isDriver);
+    // setIsActive(!isActive);
+    // alert(isDriver);
   };
   const navigate = useNavigate();
   const signIn = async (e) => {
@@ -81,12 +87,13 @@ export const Login = () => {
             <input type="email" placeholder="Email " name="email_signup" id="email_signup" autoComplete="email" />
             <input type="password" placeholder="Password" name="password_signup" id="password_signup" autoComplete="current-password"/>
             <button type='submit'>Sign Up</button>
+           
           </form>
         </div>
 
         <div className={`form-container sign-in ${isActive ? 'hidden' : ''}`}>
           <form onSubmit={signIn}>
-            <h1>Sign In</h1>
+            <h1>{`${isDriver ? 'Login as a Driver':'Sign in'}`}</h1>
             <input type="email" placeholder="Email" name="email_signin" id="email_signin" autoComplete="email" />
             <input type="password" placeholder="Password" name="password_signin" id="password_signin" autoComplete="current-password"/>
             <a >Forgot Password?</a>
@@ -105,11 +112,16 @@ export const Login = () => {
             </div>
 
             <div className="toggle-panel toggle-right">
-              <h1 className="txt">Hello, Subscriber!</h1>
+              <h1 className="txt">{`${isDriver ? 'Login as a Driver':'Hello, Subscriber!'}`}</h1>
               <p>Register with your personal details to use all site features.</p>
               <button className="toggle-button" onClick={toggleForm}>
                 Sign Up
               </button>
+              <button className="toggle-button" onClick={LoginAsDriver}>
+                {`${isDriver ? 'Sign in':'Login as a Driver'}`}
+              </button>
+             
+             
             </div>
           </div>
         </div>
